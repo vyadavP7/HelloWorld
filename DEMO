@@ -1,0 +1,114 @@
+#STRING PARAMETER 
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'USERNAME', defaultValue: '', description: 'Enter your username')
+    }
+    stages {
+        stage('Print username') {
+            steps {
+                script {
+                    echo "Username provided by the user: ${params.USERNAME}"
+                }
+            }
+        }
+    }
+}
+
+
+#CHOICE PARAMETERS 
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['Development', 'Staging', 'Production'], description: 'Select the target environment')
+    }
+    stages {
+        stage('Print your choice') {
+            steps {
+                echo "Deploying to ${params.ENVIRONMENT} environment"
+            }
+        }
+    }
+}
+
+
+#MULTI LINE PARAMETERS 
+pipeline {
+    agent any
+    parameters {
+        text(name: 'MULTI_LINE_TEXT', description: 'Enter multi-line text:', defaultValue: '', trim: true)
+    }
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    def multiLineText = params.MULTI_LINE_TEXT
+                    echo "User provided multi-line text:"
+                    echo multiLineText
+                }
+            }
+        }
+    }
+}
+
+
+#PASSWORD PARAMETER 
+pipeline {
+    agent any
+    parameters {
+        password(description: 'This is my first password', name: 'password1')
+        password(description: 'This is my second password', name: 'password2')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh "echo $password1"
+                sh "echo $password2"
+            }
+        }
+    }
+}
+
+#PASSWORD PARAMETER MASKED
+pipeline {
+    agent any
+    parameters {
+        password(description: 'This is my first password', name: 'PASSWORD1')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    maskPasswords(varMaskRegexes: [], varPasswordPairs: [[password: '12345', var: 'PASSWORD1']]) {
+                        sh "echo $PASSWORD1"
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+
+#FILE PARAMETER 
+pipeline {
+    agent any
+    parameters {
+        base64File description: 'What file would you like to upload ? ', name: 'FILE'
+    }
+
+
+    stages {
+        stage('File param') {
+            steps {
+                withFileParameter('FILE'){
+                    sh 'cat $FILE'
+                }
+            }
+        }
+    }
+}
+
+
